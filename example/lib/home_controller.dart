@@ -1,6 +1,7 @@
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names, avoid_print
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:ble_peripheral/ble_peripheral.dart';
 import 'package:flutter/foundation.dart';
@@ -11,43 +12,20 @@ class HomeController extends GetxController {
   RxBool isBleOn = false.obs;
   RxList<String> devices = <String>[].obs;
 
-  String get deviceName => switch (defaultTargetPlatform) {
-        TargetPlatform.android => "BleDroid",
-        TargetPlatform.iOS => "BleIOS",
-        TargetPlatform.macOS => "BleMac",
-        TargetPlatform.windows => "BleWin",
-        _ => "TestDevice"
-      };
+  String controlService = "c6470001-b82b-4dfb-b0e4-964a62b0e1d6";
+  String controlChar1 = "c6470002-b82b-4dfb-b0e4-964a62b0e1d6";
+  String controlChar2 = "c6470003-b82b-4dfb-b0e4-964a62b0e1d6";
 
-  var manufacturerData = ManufacturerData(
-    manufacturerId: 0x012D,
-    data: Uint8List.fromList([
-      0x03,
-      0x00,
-      0x64,
-      0x00,
-      0x45,
-      0x31,
-      0x22,
-      0xAB,
-      0x00,
-      0x21,
-      0x60,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ]),
-  );
+  String unknownService = "0000fd00-0000-1000-8000-00805f9b34fb";
+  String unknownChar1 = "0000fd01-0000-1000-8000-00805f9b34fb";
+  String unknownChar2 = "0000fd02-0000-1000-8000-00805f9b34fb";
 
-  // Battery Service
-  String serviceBattery = "0000180F-0000-1000-8000-00805F9B34FB";
-  String characteristicBatteryLevel = "00002A19-0000-1000-8000-00805F9B34FB";
-  // Test service
-  String serviceTest = "0000180D-0000-1000-8000-00805F9B34FB";
-  String characteristicTest = "00002A18-0000-1000-8000-00805F9B34FB";
+  String unknownService2 = "8EC90001-F315-4F60-9FB8-838830DAEA50";
+
+  late List<String> advertisingServices = [
+    controlService,
+    unknownService2,
+  ];
 
   @override
   void onInit() {
@@ -58,20 +36,20 @@ class HomeController extends GetxController {
     BlePeripheral.setAdvertisingStatusUpdateCallback(
         (bool advertising, String? error) {
       isAdvertising.value = advertising;
-      Get.log("AdvertingStarted: $advertising, Error: $error");
+      print("AdvertingStarted: $advertising, Error: $error");
     });
 
     BlePeripheral.setCharacteristicSubscriptionChangeCallback(
         (String deviceId, String characteristicId, bool isSubscribed) {
-      Get.log(
+      print(
         "onCharacteristicSubscriptionChange: $deviceId : $characteristicId $isSubscribed",
       );
       if (isSubscribed) {
         if (!devices.any((element) => element == deviceId)) {
           devices.add(deviceId);
-          Get.log("$deviceId adding");
+          print("$deviceId adding");
         } else {
-          Get.log("$deviceId already exists");
+          print("$deviceId already exists");
         }
       } else {
         devices.removeWhere((element) => element == deviceId);
@@ -80,20 +58,20 @@ class HomeController extends GetxController {
 
     BlePeripheral.setReadRequestCallback(
         (deviceId, characteristicId, offset, value) {
-      Get.log("ReadRequest: $deviceId $characteristicId : $offset : $value");
+      print("ReadRequest: $deviceId $characteristicId : $offset : $value");
       return ReadRequestResult(value: utf8.encode("Hello World"));
     });
 
     BlePeripheral.setWriteRequestCallback(
         (deviceId, characteristicId, offset, value) {
-      Get.log("WriteRequest: $deviceId $characteristicId : $offset : $value");
+      print("WriteRequest: $deviceId $characteristicId : $offset : $value");
       // return WriteRequestResult(status: 144);
       return null;
     });
 
     // Android only
     BlePeripheral.setBondStateChangeCallback((deviceId, bondState) {
-      Get.log("OnBondState: $deviceId $bondState");
+      print("OnBondState: $deviceId $bondState");
     });
 
     super.onInit();
@@ -103,96 +81,132 @@ class HomeController extends GetxController {
     try {
       await BlePeripheral.initialize();
     } catch (e) {
-      Get.log("InitializationError: $e");
+      print("InitializationError: $e");
     }
   }
 
   void startAdvertising() async {
-    Get.log("Starting Advertising");
+    print("Starting Advertising");
     await BlePeripheral.startAdvertising(
-      services: [serviceBattery, serviceTest],
-      localName: deviceName,
-      manufacturerData: manufacturerData,
-      addManufacturerDataInScanResponse: true,
+      services: advertisingServices,
+      localName: 'RM',
     );
   }
 
   void addServices() async {
     try {
-      var notificationControlDescriptor = BleDescriptor(
-        uuid: "00002908-0000-1000-8000-00805F9B34FB",
-        value: Uint8List.fromList([0, 1]),
-        permissions: [
-          AttributePermissions.readable.index,
-          AttributePermissions.writeable.index
-        ],
-      );
+      // Add General Service
+      if (!Platform.isWindows) {
+        // We can
+        await BlePeripheral.addService(
+          BleService(
+            uuid: "0000180a-0000-1000-8000-00805f9b34fb",
+            primary: true,
+            characteristics: [
+              BleCharacteristic(
+                uuid: "00002a29-0000-1000-8000-00805f9b34fb",
+                properties: [CharacteristicProperties.read.index],
+                permissions: [AttributePermissions.readable.index],
+              ),
+              BleCharacteristic(
+                uuid: "00002a24-0000-1000-8000-00805f9b34fb",
+                properties: [CharacteristicProperties.read.index],
+                permissions: [AttributePermissions.readable.index],
+              ),
+              BleCharacteristic(
+                uuid: "00002a27-0000-1000-8000-00805f9b34fb",
+                properties: [CharacteristicProperties.read.index],
+                permissions: [AttributePermissions.readable.index],
+              ),
+              BleCharacteristic(
+                uuid: "00002a26-0000-1000-8000-00805f9b34fb",
+                properties: [CharacteristicProperties.read.index],
+                permissions: [AttributePermissions.readable.index],
+              ),
+            ],
+          ),
+        );
+      }
 
+      // await BlePeripheral.addService(
+      //   BleService(
+      //     uuid: unknownService2,
+      //     primary: true,
+      //     characteristics: [],
+      //   ),
+      // );
+
+      // Add Control Service
       await BlePeripheral.addService(
         BleService(
-          uuid: serviceBattery,
+          uuid: controlService,
           primary: true,
           characteristics: [
             BleCharacteristic(
-              uuid: characteristicBatteryLevel,
-              properties: [
-                CharacteristicProperties.read.index,
-                CharacteristicProperties.notify.index
-              ],
-              value: null,
-              permissions: [AttributePermissions.readable.index],
-            ),
-          ],
-        ),
-      );
-
-      await BlePeripheral.addService(
-        BleService(
-          uuid: serviceTest,
-          primary: true,
-          characteristics: [
-            BleCharacteristic(
-              uuid: characteristicTest,
-              properties: [
-                CharacteristicProperties.read.index,
-                CharacteristicProperties.notify.index,
-                CharacteristicProperties.write.index,
-              ],
-              descriptors: [notificationControlDescriptor],
-              value: null,
+              uuid: controlChar1,
+              properties: [CharacteristicProperties.notify.index],
               permissions: [
-                AttributePermissions.readable.index,
-                AttributePermissions.writeable.index
+                AttributePermissions.writeable.index,
+                AttributePermissions.readable.index
               ],
+            ),
+            BleCharacteristic(
+              uuid: controlChar2,
+              properties: [CharacteristicProperties.writeWithoutResponse.index],
+              permissions: [AttributePermissions.writeable.index],
             ),
           ],
         ),
       );
-      Get.log("Services added");
+
+      // Add Unknown Service
+      await BlePeripheral.addService(
+        BleService(
+          uuid: unknownService,
+          primary: true,
+          characteristics: [
+            BleCharacteristic(
+              uuid: unknownChar1,
+              properties: [CharacteristicProperties.writeWithoutResponse.index],
+              permissions: [AttributePermissions.writeable.index],
+            ),
+            BleCharacteristic(
+              uuid: unknownChar2,
+              properties: [
+                CharacteristicProperties.notify.index,
+                CharacteristicProperties.writeWithoutResponse.index,
+              ],
+              permissions: [AttributePermissions.writeable.index],
+            ),
+          ],
+        ),
+      );
+      print("Services added");
     } catch (e) {
-      Get.log("Error: $e");
+      print("Error: $e");
     }
   }
 
   void getAllServices() async {
     List<String> services = await BlePeripheral.getServices();
-    Get.log(services.toString());
+    print(services.toString());
   }
 
   void removeServices() async {
     await BlePeripheral.clearServices();
-    Get.log("Services removed");
+    print("Services removed");
   }
 
   /// Update characteristic value, to all the devices which are subscribed to it
   void updateCharacteristic() async {
     try {
       await BlePeripheral.updateCharacteristic(
-        characteristicId: characteristicTest,
-        value: utf8.encode("Test Data"),
+        characteristicId: controlChar1,
+        // TODO: add proper data
+        value: Uint8List.fromList([0x00, 0x00, 0x04]),
       );
     } catch (e) {
-      Get.log("UpdateCharacteristicError: $e");
+      print("UpdateCharacteristicError: $e");
     }
   }
 }
