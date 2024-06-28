@@ -99,7 +99,6 @@ class HomeController extends GetxController {
     try {
       // Add General Service
       if (!Platform.isWindows) {
-        // We can
         await BlePeripheral.addService(
           BleService(
             uuid: "0000180a-0000-1000-8000-00805f9b34fb",
@@ -110,7 +109,8 @@ class HomeController extends GetxController {
                 uuid: "00002a29-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
-                value: Uint8List.fromList([0x46, 0x55, 0x4A, 0x49,0x46,0x49,0x4C,0x4D,0x00]),
+                value: Uint8List.fromList(
+                    [0x46, 0x55, 0x4A, 0x49, 0x46, 0x49, 0x4C, 0x4D, 0x00]),
               ),
               // Model Number
               BleCharacteristic(
@@ -180,6 +180,28 @@ class HomeController extends GetxController {
                 CharacteristicProperties.writeWithoutResponse.index,
               ],
               permissions: [AttributePermissions.writeable.index],
+            ),
+          ],
+        ),
+      );
+
+      // Add 0x1800 Service
+      await BlePeripheral.addService(
+        BleService(
+          uuid: "00001800-0000-1000-8000-00805f9b34fb",
+          primary: true,
+          characteristics: [
+            BleCharacteristic(
+              uuid: "0x2A00",
+              properties: [CharacteristicProperties.read.index],
+              permissions: [AttributePermissions.readable.index],
+              value: Uint8List.fromList([0x42, 0x54, 0x52, 0x2D, 0x46, 0x31]),
+            ),
+            BleCharacteristic(
+              uuid: "0x2A01",
+              properties: [CharacteristicProperties.read.index],
+              permissions: [AttributePermissions.readable.index],
+              value: Uint8List.fromList([0x00, 0x00]),
             ),
           ],
         ),
