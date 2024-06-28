@@ -97,7 +97,7 @@ class HomeController extends GetxController {
 
   void addServices() async {
     try {
-      // Add General Service
+      // Add General Services
       if (!Platform.isWindows) {
         await BlePeripheral.addService(
           BleService(
@@ -133,6 +133,27 @@ class HomeController extends GetxController {
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
                 value: Uint8List.fromList([0x31, 0x2E, 0x31, 0x00]),
+              ),
+            ],
+          ),
+        );
+        // Add 0x1800 Service
+        await BlePeripheral.addService(
+          BleService(
+            uuid: "00001800-0000-1000-8000-00805f9b34fb",
+            primary: true,
+            characteristics: [
+              BleCharacteristic(
+                uuid: "0x2A00",
+                properties: [CharacteristicProperties.read.index],
+                permissions: [AttributePermissions.readable.index],
+                value: Uint8List.fromList([0x42, 0x54, 0x52, 0x2D, 0x46, 0x31]),
+              ),
+              BleCharacteristic(
+                uuid: "0x2A01",
+                properties: [CharacteristicProperties.read.index],
+                permissions: [AttributePermissions.readable.index],
+                value: Uint8List.fromList([0x00, 0x00]),
               ),
             ],
           ),
@@ -185,27 +206,6 @@ class HomeController extends GetxController {
         ),
       );
 
-      // Add 0x1800 Service
-      await BlePeripheral.addService(
-        BleService(
-          uuid: "00001800-0000-1000-8000-00805f9b34fb",
-          primary: true,
-          characteristics: [
-            BleCharacteristic(
-              uuid: "0x2A00",
-              properties: [CharacteristicProperties.read.index],
-              permissions: [AttributePermissions.readable.index],
-              value: Uint8List.fromList([0x42, 0x54, 0x52, 0x2D, 0x46, 0x31]),
-            ),
-            BleCharacteristic(
-              uuid: "0x2A01",
-              properties: [CharacteristicProperties.read.index],
-              permissions: [AttributePermissions.readable.index],
-              value: Uint8List.fromList([0x00, 0x00]),
-            ),
-          ],
-        ),
-      );
       print("Services added");
     } catch (e) {
       print("Error: $e");
