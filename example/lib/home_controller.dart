@@ -12,6 +12,8 @@ class HomeController extends GetxController {
   RxBool isBleOn = false.obs;
   RxList<String> devices = <String>[].obs;
 
+  String deviceName = "BTR-C";
+
   String controlService = "c6470001-b82b-4dfb-b0e4-964a62b0e1d6";
   String controlChar1 = "c6470002-b82b-4dfb-b0e4-964a62b0e1d6";
   String controlChar2 = "c6470003-b82b-4dfb-b0e4-964a62b0e1d6";
@@ -24,7 +26,7 @@ class HomeController extends GetxController {
 
   late List<String> advertisingServices = [
     controlService,
-    unknownService2,
+    // unknownService2,
   ];
 
   @override
@@ -59,7 +61,7 @@ class HomeController extends GetxController {
     BlePeripheral.setReadRequestCallback(
         (deviceId, characteristicId, offset, value) {
       print("ReadRequest: $deviceId $characteristicId : $offset : $value");
-      return ReadRequestResult(value: utf8.encode("Hello World"));
+      return ReadRequestResult(value: utf8.encode("Default value"));
     });
 
     BlePeripheral.setWriteRequestCallback(
@@ -89,7 +91,7 @@ class HomeController extends GetxController {
     print("Starting Advertising");
     await BlePeripheral.startAdvertising(
       services: advertisingServices,
-      localName: 'RM',
+      localName: deviceName,
     );
   }
 
@@ -103,38 +105,39 @@ class HomeController extends GetxController {
             uuid: "0000180a-0000-1000-8000-00805f9b34fb",
             primary: true,
             characteristics: [
+              // Manufacturer Name
               BleCharacteristic(
                 uuid: "00002a29-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
+                value: Uint8List.fromList([0x46, 0x55, 0x4A, 0x49,0x46,0x49,0x4C,0x4D,0x00]),
               ),
+              // Model Number
               BleCharacteristic(
                 uuid: "00002a24-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
+                value: Uint8List.fromList(
+                    [0x42, 0x54, 0x52, 0x2D, 0x46, 0x31, 0x00]),
               ),
+              // Serial Number
               BleCharacteristic(
                 uuid: "00002a27-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
+                value: Uint8List.fromList([0x31, 0x2E, 0x31, 0x00]),
               ),
+              // Firmware Revision
               BleCharacteristic(
                 uuid: "00002a26-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
+                value: Uint8List.fromList([0x31, 0x2E, 0x31, 0x00]),
               ),
             ],
           ),
         );
       }
-
-      // await BlePeripheral.addService(
-      //   BleService(
-      //     uuid: unknownService2,
-      //     primary: true,
-      //     characteristics: [],
-      //   ),
-      // );
 
       // Add Control Service
       await BlePeripheral.addService(
