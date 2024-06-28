@@ -106,13 +106,13 @@ class HomeController extends GetxController {
             primary: true,
             characteristics: [
               BleCharacteristic(
-                uuid: "0x2A00",
+                uuid: "00002A00-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
                 value: Uint8List.fromList([0x42, 0x54, 0x52, 0x2D, 0x46, 0x31]),
               ),
               BleCharacteristic(
-                uuid: "0x2A01",
+                uuid: "00002A01-0000-1000-8000-00805f9b34fb",
                 properties: [CharacteristicProperties.read.index],
                 permissions: [AttributePermissions.readable.index],
                 value: Uint8List.fromList([0x00, 0x00]),
