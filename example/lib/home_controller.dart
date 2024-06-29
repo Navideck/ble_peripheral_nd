@@ -127,18 +127,17 @@ class HomeController extends GetxController {
             uuid: "00001801-0000-1000-8000-00805f9b34fb",
             primary: true,
             characteristics: [
-              // BleCharacteristic(
-              //   uuid: "0x2A05",
-              //   properties: [CharacteristicProperties.read.index],
-              //   permissions: [AttributePermissions.readable.index],
-              //   value: Uint8List.fromList([0x42, 0x54, 0x52, 0x2D, 0x46, 0x31]),
-              // ),
-              // BleCharacteristic(
-              //   uuid: "0x2902",
-              //   properties: [CharacteristicProperties.read.index],
-              //   permissions: [AttributePermissions.readable.index],
-              //   value: Uint8List.fromList([0x00, 0x00]),
-              // ),
+              BleCharacteristic(
+                uuid: "00002A05-0000-1000-8000-00805f9b34fb",
+                properties: [CharacteristicProperties.indicate.index],
+                permissions: [AttributePermissions.readable.index],
+                descriptors: [
+                  BleDescriptor(
+                    uuid: "00002902-0000-1000-8000-00805f9b34fb",
+                    value: Uint8List.fromList([0x00, 0x00]),
+                  ),
+                ],
+              ),
             ],
           ),
         );
