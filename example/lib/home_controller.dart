@@ -14,20 +14,10 @@ class HomeController extends GetxController {
 
   String deviceName = "BTR-C";
 
-  String controlService = "c6470001-b82b-4dfb-b0e4-964a62b0e1d6";
-  String controlChar1 = "c6470002-b82b-4dfb-b0e4-964a62b0e1d6";
-  String controlChar2 = "c6470003-b82b-4dfb-b0e4-964a62b0e1d6";
-
-  String unknownService = "0000fd00-0000-1000-8000-00805f9b34fb";
-  String unknownChar1 = "0000fd01-0000-1000-8000-00805f9b34fb";
-  String unknownChar2 = "0000fd02-0000-1000-8000-00805f9b34fb";
-
-  String unknownService2 = "8EC90001-F315-4F60-9FB8-838830DAEA50";
-
-  late List<String> advertisingServices = [
-    controlService,
-    // unknownService2,
-  ];
+  String controlService = "e635bed3-69af-4347-99fa-d6f34b791169";
+  String controlChar1 = "82f949b4-f5dc-4cf3-ab3c-fd9fd4017b68";
+  String controlChar2 = "b7a8015c-cb94-4efa-bda2-b7921fa9951f";
+  String controlChar3 = "05a02050-0860-4919-8add-9801fba8b6ed";
 
   @override
   void onInit() {
@@ -90,7 +80,9 @@ class HomeController extends GetxController {
   void startAdvertising() async {
     print("Starting Advertising");
     await BlePeripheral.startAdvertising(
-      services: advertisingServices,
+      services: [
+        // TODO: add advertising service
+      ],
       localName: deviceName,
     );
   }
@@ -191,7 +183,11 @@ class HomeController extends GetxController {
           characteristics: [
             BleCharacteristic(
               uuid: controlChar1,
-              properties: [CharacteristicProperties.notify.index],
+              properties: [
+                CharacteristicProperties.read.index,
+                CharacteristicProperties.write.index,
+                CharacteristicProperties.notify.index,
+              ],
               permissions: [
                 AttributePermissions.writeable.index,
                 AttributePermissions.readable.index
@@ -199,31 +195,27 @@ class HomeController extends GetxController {
             ),
             BleCharacteristic(
               uuid: controlChar2,
-              properties: [CharacteristicProperties.writeWithoutResponse.index],
-              permissions: [AttributePermissions.writeable.index],
-            ),
-          ],
-        ),
-      );
-
-      // Add Unknown Service
-      await BlePeripheral.addService(
-        BleService(
-          uuid: unknownService,
-          primary: true,
-          characteristics: [
-            BleCharacteristic(
-              uuid: unknownChar1,
-              properties: [CharacteristicProperties.writeWithoutResponse.index],
-              permissions: [AttributePermissions.writeable.index],
-            ),
-            BleCharacteristic(
-              uuid: unknownChar2,
               properties: [
+                CharacteristicProperties.read.index,
+                CharacteristicProperties.write.index,
                 CharacteristicProperties.notify.index,
-                CharacteristicProperties.writeWithoutResponse.index,
               ],
-              permissions: [AttributePermissions.writeable.index],
+              permissions: [
+                AttributePermissions.writeable.index,
+                AttributePermissions.readable.index
+              ],
+            ),
+            BleCharacteristic(
+              uuid: controlChar3,
+              properties: [
+                CharacteristicProperties.read.index,
+                CharacteristicProperties.write.index,
+                CharacteristicProperties.notify.index,
+              ],
+              permissions: [
+                AttributePermissions.writeable.index,
+                AttributePermissions.readable.index,
+              ],
             ),
           ],
         ),

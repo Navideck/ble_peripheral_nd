@@ -1,0 +1,28 @@
+<server-configuration name="BJMA23095 - pairing">
+   <service uuid="e635bed3-69af-4347-99fa-d6f34b791169">
+      <characteristic uuid="82f949b4-f5dc-4cf3-ab3c-fd9fd4017b68">
+         <descriptor configure="CCCD"/>
+         <permission name="READ"/>
+         <permission name="WRITE"/>
+         <property name="READ"/>
+         <property name="WRITE"/>
+         <property name="NOTIFY"/>
+      </characteristic>
+      <characteristic uuid="b7a8015c-cb94-4efa-bda2-b7921fa9951f">
+         <descriptor configure="CCCD"/>
+         <permission name="READ"/>
+         <permission name="WRITE"/>
+         <property name="READ"/>
+         <property name="WRITE"/>
+         <property name="NOTIFY"/>
+      </characteristic>
+      <characteristic uuid="05a02050-0860-4919-8add-9801fba8b6ed">
+         <descriptor configure="CCCD"/>
+         <permission name="READ"/>
+         <permission name="WRITE"/>
+         <property name="READ"/>
+         <property name="WRITE"/>
+         <property name="NOTIFY"/>
+      </characteristic>
+   </service>
+</server-configuration>
